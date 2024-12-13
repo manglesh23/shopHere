@@ -45,7 +45,7 @@ userSchema.methods.compare =  function (password) {
   return response;
 };
 
-const User = new mongoose.model("users", userSchema);
+const User = new mongoose.model("User", userSchema);
 
 module.exports = User;
 console.log("model called");
