@@ -7,4 +7,4 @@ userrouter.post('/createuser',createUser);
 userrouter.post('/login',userlogIn);
 
 module.exports=userrouter;
-console.log("router user")
+// console.log("router user")
