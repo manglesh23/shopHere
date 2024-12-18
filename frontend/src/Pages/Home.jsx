@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Flex,
@@ -16,16 +16,95 @@ import {
   MenuItem,
   MenuList,
   Tooltip,
+  Spinner,
 } from "@chakra-ui/react";
 import { FiShoppingCart, FiUser, FiSearch } from "react-icons/fi";
+import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useInfiniteQuery } from "@tanstack/react-query";
+
+const fetchProduct = async ({ pageParam = 1 }) => {
+  console.log("Page Param:-", pageParam);
+  let response = await axios.get(
+    `http://localhost:7000/product/getproduct?page=${pageParam}&limit=2`
+  );
+  return response.data;
+  // console.log("Response:-", response.data);
+};
 
 const Home = () => {
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useInfiniteQuery({
+      queryKey: ["products"],
+      queryFn: fetchProduct,
+      getNextPageParam: (lastPage) => {
+        console.log("last Page:-", lastPage);
+        if (!lastPage) return undefined;
+        const { currentPage, totalPages } = lastPage;
+        console.log("Current and last:-", currentPage, totalPages);
+        let nextPage = currentPage <= totalPages ? currentPage + 1 : undefined;
+        console.log("Next page:-", nextPage);
+        // console.log("Has next Page:-",hasNextPage,isFetchingNextPage);
+        return nextPage;
+      },
+    });
+
+  const [role, setRole] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUserRole = () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        if (token) {
+          let user = jwtDecode(token);
+          console.log("User:-", user);
+          setRole(user.role);
+        } else {
+          console.warn("not token");
+        }
+      } catch (err) {
+        console.log("Error:-", err);
+      }
+    };
+    fetchUserRole();
+  }, []);
+
   const logout = () => {
     console.log("Log Out");
     localStorage.removeItem("authToken");
     // alert("Logged out successfully!");
     window.location.href = "/";
   };
+
+  const addproduct = () => {
+    navigate("/addproduct");
+  };
+
+  if (isLoading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        <Spinner size="xl" />
+      </Box>
+    );
+  }
+
+  // if (error) {
+  //   return (
+  //     <Box textAlign="center" mt="10">
+  //       <Text fontSize="lg" color="red.500">
+  //         Failed to load products. Please try again later.
+  //       </Text>
+  //     </Box>
+  //   );
+  // }
+
   return (
     <Box
       bg="gray.50"
@@ -83,6 +162,9 @@ const Home = () => {
               >
                 <MenuItem>Profile</MenuItem>
                 <MenuItem>Settings</MenuItem>
+                {role === "Admin" && (
+                  <MenuItem onClick={addproduct}>Add Product</MenuItem>
+                )}
                 <MenuItem onClick={logout}>Logout</MenuItem>
               </MenuList>
             </Menu>
@@ -151,33 +233,52 @@ const Home = () => {
           Featured Products
         </Text>
         <Grid templateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap={6}>
-          {[...Array(8)].map((_, index) => (
-            <GridItem
-              key={index}
-              bg="white"
-              p={4}
-              borderRadius="md"
-              boxShadow="sm"
-            >
-              <VStack>
+          {data?.pages.map((page, pageIndex) =>
+            page.products.map((product) => (
+              <GridItem
+                key={`${pageIndex}-${product._id}`}
+                bg="white"
+                p={4}
+                borderRadius="md"
+                boxShadow="sm"
+                borderWidth="1px"
+                borderColor="gray.200"
+              >
                 <Image
-                  src="https://via.placeholder.com/150"
-                  alt="Product Image"
+                  src={product.image || "https://via.placeholder.com/150"}
+                  alt={product.name}
                   borderRadius="md"
+                  mb={3}
                 />
-                <Text fontSize="lg" fontWeight="bold">
-                  Product {index + 1}
+                <Text fontSize="lg" fontWeight="bold" noOfLines={1}>
+                  {product.name}
                 </Text>
-                <Text color="teal.500" fontSize="lg">
-                  999
+                <Text color="teal.500" fontSize="md" mt={1}>
+                  ₹{product.price}
                 </Text>
-                <Button colorScheme="teal" size="sm" mt={2}>
+                <Button colorScheme="teal" size="sm" mt={3} width="100%">
                   Add to Cart
                 </Button>
-              </VStack>
-            </GridItem>
-          ))}
+              </GridItem>
+            ))
+          )}
         </Grid>
+        {hasNextPage && (
+          <Box textAlign="center" mt={8}>
+            <Button
+              onClick={() => fetchNextPage()}
+              isDisabled={!hasNextPage || isFetchingNextPage}
+              isLoading={isFetchingNextPage}
+              colorScheme="teal"
+            >
+              {isFetchingNextPage
+                ? "Loading..."
+                : hasNextPage
+                ? "Load More"
+                : "No More Products"}
+            </Button>
+          </Box>
+        )}
       </Box>
 
       {/* Footer */}

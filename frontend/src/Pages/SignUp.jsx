@@ -11,15 +11,17 @@ import {
   Stack,
   Text,
   Link,
-  useToast
+  useToast,
 } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
 
 function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
-  const toast=useToast();
+  const toast = useToast();
+  const navigate = useNavigate();
 
   const handleSignUp = async (event) => {
     try {
@@ -47,22 +49,23 @@ function SignUp() {
 
       let response = await axios(config);
       console.log("Response:-", response);
-      if(response.data.success){
+      if (response.data.success) {
         toast({
-            title: 'Sign Up successful.',
-            description: 'You have successfully Registered in!',
-            status: 'success',
-            duration: 3000,
-            isClosable: true,
-          });
-      }else{
+          title: "Sign Up successful.",
+          description: "You have successfully Registered in!",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+        navigate("/");
+      } else {
         toast({
-            title: 'Sign Up Failed',
-            description: '',
-            status: 'failed',
-            duration: 3000,
-            isClosable: true,
-          });
+          title: "Sign Up Failed",
+          description: "",
+          status: "failed",
+          duration: 3000,
+          isClosable: true,
+        });
       }
     } catch (e) {
       alert("failed");

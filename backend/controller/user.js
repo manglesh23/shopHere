@@ -25,7 +25,7 @@ const userlogIn = async (req, res) => {
     res.status(404).json({ msg: "Incorrect Credentials", success: false });
   } else {
     let token = jsonwebtoken.sign(
-      { id: findUser._id, email: findUser.email },
+      { id: findUser._id, email: findUser.email,role:findUser.role },
       process.env.SECRET_KEY,
       { expiresIn: "1d" }
     );

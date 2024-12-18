@@ -1,8 +1,10 @@
 const express=require('express');
-const { createProduct } = require('../controller/product');
+const { createProduct, getProduct } = require('../controller/product');
+const { verifytoken } = require('../helper/verifyToken');
 
 const productRouter= express.Router();
 
-productRouter.post('/createproduct',createProduct);
+productRouter.post('/createproduct',verifytoken,createProduct);
+productRouter.get('/getproduct',getProduct);
 
 module.exports=productRouter;
