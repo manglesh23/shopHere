@@ -24,8 +24,10 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
+// import handlebuynow from "../helper/handleBuyNow";
+
 const fetchProduct = async ({ pageParam = 1 }) => {
-  console.log("Page Param:-", pageParam);
+  // console.log("Page Param:-", pageParam);
   let response = await axios.get(
     `http://localhost:7000/product/getproduct?page=${pageParam}&limit=2`
   );
@@ -34,21 +36,27 @@ const fetchProduct = async ({ pageParam = 1 }) => {
 };
 
 const Home = () => {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useInfiniteQuery({
-      queryKey: ["products"],
-      queryFn: fetchProduct,
-      getNextPageParam: (lastPage) => {
-        console.log("last Page:-", lastPage);
-        if (!lastPage) return undefined;
-        const { currentPage, totalPages } = lastPage;
-        console.log("Current and last:-", currentPage, totalPages);
-        let nextPage = currentPage <= totalPages ? currentPage + 1 : undefined;
-        console.log("Next page:-", nextPage);
-        // console.log("Has next Page:-",hasNextPage,isFetchingNextPage);
-        return nextPage;
-      },
-    });
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+  } = useInfiniteQuery({
+    queryKey: ["products"],
+    queryFn: fetchProduct,
+    getNextPageParam: (lastPage) => {
+      // console.log("last Page:-", lastPage);
+      if (!lastPage) return undefined;
+      const { currentPage, totalPages } = lastPage;
+      // console.log("Current and last:-", currentPage, totalPages);
+      let nextPage = currentPage <= totalPages ? currentPage + 1 : undefined;
+      // console.log("Next page:-", nextPage);
+      // console.log("Has next Page:-",hasNextPage,isFetchingNextPage);
+      return nextPage;
+    },
+  });
 
   const [role, setRole] = useState(null);
   const navigate = useNavigate();
@@ -82,6 +90,18 @@ const Home = () => {
     navigate("/addproduct");
   };
 
+  const handleBuyNow = (product) => {
+    console.log("Buy Now");
+
+    navigate("/payment", {
+      state: {
+        price: product.price, // Example price
+        productName: product.name,
+        description: "Product Description",
+      },
+    });
+  };
+
   if (isLoading) {
     return (
       <Box
@@ -95,15 +115,19 @@ const Home = () => {
     );
   }
 
-  // if (error) {
-  //   return (
-  //     <Box textAlign="center" mt="10">
-  //       <Text fontSize="lg" color="red.500">
-  //         Failed to load products. Please try again later.
-  //       </Text>
-  //     </Box>
-  //   );
-  // }
+  if (isError) {
+    return (
+      <Box textAlign="center" mt="10">
+        <Text fontSize="lg" color="red.500">
+          Failed to load products. Please try again later.
+        </Text>
+      </Box>
+    );
+  }
+
+  const handleClick = () => {
+    console.log("Add to cart");
+  };
 
   return (
     <Box
@@ -256,9 +280,24 @@ const Home = () => {
                 <Text color="teal.500" fontSize="md" mt={1}>
                   ₹{product.price}
                 </Text>
-                <Button colorScheme="teal" size="sm" mt={3} width="100%">
-                  Add to Cart
-                </Button>
+                <HStack spacing={4} mt={3} width="100%">
+                  <Button
+                    colorScheme="teal"
+                    size="sm"
+                    onClick={handleClick}
+                    width="50%"
+                  >
+                    Add to Cart
+                  </Button>
+                  <Button
+                    colorScheme="teal"
+                    size="sm"
+                    onClick={()=>handleBuyNow(product)}
+                    width="50%"
+                  >
+                    Buy Now
+                  </Button>
+                </HStack>
               </GridItem>
             ))
           )}
