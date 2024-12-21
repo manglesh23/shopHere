@@ -149,8 +149,8 @@ const Home = () => {
         // overflow="hidden"
         zIndex="dropdown"
       >
-        <Text fontSize="2xl" fontWeight="bold" color="teal.500">
-          Riyandu's Dukan
+        <Text fontSize="2xl" fontWeight="bold" color="teal.500" fontStyle="oblique">
+          Shop Here
         </Text>
         <Flex gap={4} width="70%">
           <Input
