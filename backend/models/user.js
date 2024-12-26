@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-console.log("model");
+// console.log("model");
 
 const bcrypt = require("bcrypt");
 const userSchema = mongoose.Schema({
@@ -52,4 +52,4 @@ userSchema.methods.compare =  function (password) {
 const User = new mongoose.model("User", userSchema);
 
 module.exports = User;
-console.log("model called");
+// console.log("model called");

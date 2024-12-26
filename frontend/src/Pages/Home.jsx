@@ -17,14 +17,13 @@ import {
   MenuList,
   Tooltip,
   Spinner,
+  useToast,
 } from "@chakra-ui/react";
 import { FiShoppingCart, FiUser, FiSearch } from "react-icons/fi";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useInfiniteQuery } from "@tanstack/react-query";
-
-// import handlebuynow from "../helper/handleBuyNow";
 
 const fetchProduct = async ({ pageParam = 1 }) => {
   // console.log("Page Param:-", pageParam);
@@ -60,6 +59,7 @@ const Home = () => {
 
   const [role, setRole] = useState(null);
   const navigate = useNavigate();
+  const toast = useToast();
 
   useEffect(() => {
     const fetchUserRole = () => {
@@ -92,7 +92,6 @@ const Home = () => {
 
   const handleBuyNow = (product) => {
     console.log("Buy Now");
-
     navigate("/payment", {
       state: {
         price: product.price, // Example price
@@ -125,9 +124,53 @@ const Home = () => {
     );
   }
 
-  const handleClick = () => {
-    console.log("Add to cart");
+  const handleClick = async (product) => {
+    console.log("Add to cart", product);
+    let getToken = localStorage.getItem("authToken");
+    // console.log("Token:-",getToken)
+    let data = JSON.stringify({
+      productId: product._id,
+      name: product.name,
+      price: product.price,
+      quantity: 1,
+    });
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: "http://localhost:7000/cart/addtocart",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: getToken,
+      },
+      data: data,
+    };
+
+    let response = await axios(config);
+    console.log("Response:-", response);
+    if (response.data.success) {
+      toast({
+        title: "Added to Cart Successfully",
+        description: "",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } else {
+      toast({
+        title: "Failed to Add",
+        description: "",
+        status: "failed",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
+
+  const handleCart=()=>{
+    console.log("Handle Cart");
+    navigate('/cart');
+  }
 
   return (
     <Box
@@ -149,7 +192,12 @@ const Home = () => {
         // overflow="hidden"
         zIndex="dropdown"
       >
-        <Text fontSize="2xl" fontWeight="bold" color="teal.500" fontStyle="oblique">
+        <Text
+          fontSize="2xl"
+          fontWeight="bold"
+          color="teal.500"
+          fontStyle="oblique"
+        >
           Shop Here
         </Text>
         <Flex gap={4} width="70%">
@@ -198,6 +246,7 @@ const Home = () => {
               icon={<FiShoppingCart />}
               variant="ghost"
               fontSize="xl"
+              onClick={()=>handleCart()}
             />
           </HStack>
         </Flex>
@@ -284,7 +333,7 @@ const Home = () => {
                   <Button
                     colorScheme="teal"
                     size="sm"
-                    onClick={handleClick}
+                    onClick={() => handleClick(product)}
                     width="50%"
                   >
                     Add to Cart
@@ -292,7 +341,7 @@ const Home = () => {
                   <Button
                     colorScheme="teal"
                     size="sm"
-                    onClick={()=>handleBuyNow(product)}
+                    onClick={() => handleBuyNow(product)}
                     width="50%"
                   >
                     Buy Now

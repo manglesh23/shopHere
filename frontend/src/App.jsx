@@ -9,6 +9,7 @@ import ProtectedRoute from "./helper/protectedRouter";
 import AddProduct from "./Pages/AddProduct";
 import PaymentComponent from "./helper/PaymentComponent";
 import { useLocation } from "react-router-dom";
+import Cart from "./Pages/Cart";
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
         <Route path="/signup" element={<SignUp/>}/>
         <Route path="/addproduct" element={<AddProduct/>}/>
         <Route path="/payment" element={<PaymentComponent/>}/>
+        <Route path='/cart' element={<Cart/>}/>
       </Routes>
     </>
   );

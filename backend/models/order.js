@@ -13,6 +13,10 @@ const orderSchema = new mongoose.Schema({
         ref: "Product", // Reference to the Product schema
         required: true,
       },
+      name:{
+        type:String,
+        required:true
+      },
       quantity: {
         type: Number,
         required: true,
@@ -38,22 +42,23 @@ const orderSchema = new mongoose.Schema({
     enum: ["Processing", "Shipped", "Delivered", "Cancelled", "Returned"],
     default: "Processing",
   },
-  shippingAddress: {
-    type: Object,
-    required: true,
-    properties: {
-      street: { type: String },
-      city: { type: String },
-      state: { type: String },
-      postalCode: { type: String },
-      country: { type: String },
-    },
-  },
-  paymentDetails: {
-    razorpayOrderId: { type: String }, // ID from Razorpay
-    paymentId: { type: String }, // Payment ID for successful payment
-    signature: { type: String }, // Signature to validate payment
-  },
+  // shippingAddress: {
+  //   type: Object,
+  //   required: true,
+  //   properties: {
+  //     street: { type: String },
+  //     city: { type: String },
+  //     state: { type: String },
+  //     postalCode: { type: String },
+  //     country: { type: String },
+  //   },
+  // },
+  // paymentDetails: {
+  //   razorpayOrderId: { type: String }, // ID from Razorpay
+  //   paymentId: { type: String }, // Payment ID for successful payment
+  //   signature: { type: String }, // Signature to validate payment
+  // },
+  couponApplied: { type: Boolean, default: false },
   createdAt: {
     type: Date,
     default: Date.now,
